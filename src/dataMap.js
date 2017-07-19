@@ -552,7 +552,7 @@ DataMap.prototype.get = function(row, prop) {
      *      }
      *    }]}
      */
-    value = prop(this.dataSource.slice(row, row + 1)[0], row, this.dataSource);
+    value = prop(this.dataSource.slice(row, row + 1)[0], undefined, row, this.dataSource);
   }
 
   if (this.instance.hasHook('modifyData')) {

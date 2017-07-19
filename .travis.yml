@@ -3,12 +3,12 @@ language: node_js
 sudo: false
 
 node_js:
-  - "6"
+ - "6"
 
 # before_script:
 #   - "export TZ=Europe/Warsaw"
 
- after_success:
-  - ./travis_pushDist.sh
- script:
-  - ./npm run build
+after_success:
+ - ./travis_pushDist.sh
+script:
+ - ./npm run build

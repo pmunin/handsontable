@@ -9,6 +9,7 @@ before_script:
  - "export TZ=Europe/Warsaw"
 
 after_success:
+ - chmod +x ./travis_pushDist.sh
  - ./travis_pushDist.sh
 script:
  - "npm run build"

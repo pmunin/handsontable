@@ -644,7 +644,7 @@ DataMap.prototype.set = function(row, prop, value, source) {
       if(dataSchema instanceof Function)
         dataRow = dataSchema(row,prop, value, this.dataSource);
       else 
-        dataRow = _object.deepClone(dataSchema);
+        dataRow = deepClone(dataSchema);
       
       this.dataSource[row] = dataRow;
     }

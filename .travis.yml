@@ -3,7 +3,18 @@ language: node_js
 sudo: false
 
 node_js:
-  - "6"
+ - "6"
 
 before_script:
-  - "export TZ=Europe/Warsaw"
+ - "export TZ=Europe/Warsaw"
+
+# after_success:
+#  - chmod +x ./travis_pushDist.sh
+#  - ./travis_pushDist.sh
+script:
+ - 'npm run build'
+ - 'git checkout master'
+ - 'git commit --message "[skip ci] Travis build: $TRAVIS_BUILD_NUMBER" -- dist'
+ - "git remote rm origin"
+ - "git remote add origin https://${GITHUB_TOKEN}@github.com/pmunin/handsontable.git"
+ - "git push --quiet --set-upstream origin master"

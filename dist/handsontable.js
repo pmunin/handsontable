@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 0.33.0
- * Date: Wed Jul 19 2017 21:28:12 GMT+0200 (CEST)
+ * Date: Wed Jul 19 2017 22:07:39 GMT+0200 (CEST)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -27057,7 +27057,7 @@ var _data = __webpack_require__(64);
 
 var _setting = __webpack_require__(65);
 
-var _object2 = __webpack_require__(1);
+var _object = __webpack_require__(1);
 
 var _array = __webpack_require__(2);
 
@@ -27123,7 +27123,7 @@ DataMap.prototype.DESTINATION_CLIPBOARD_GENERATOR = 2;
  * @returns {Object|Array}
  */
 DataMap.prototype.recursiveDuckSchema = function (object) {
-  return (0, _object2.duckSchema)(object);
+  return (0, _object.duckSchema)(object);
 };
 
 /**
@@ -27140,7 +27140,7 @@ DataMap.prototype.recursiveDuckColumns = function (schema, lastCol, parent) {
   }
   if ((typeof schema === 'undefined' ? 'undefined' : _typeof(schema)) === 'object' && !Array.isArray(schema)) {
     for (i in schema) {
-      if ((0, _object2.hasOwnProperty)(schema, i)) {
+      if ((0, _object.hasOwnProperty)(schema, i)) {
         if (schema[i] === null) {
           prop = parent + i;
           this.colToPropCache.push(prop);
@@ -27175,7 +27175,7 @@ DataMap.prototype.createMap = function () {
     var columnsLen = Math.min(maxCols, columns.length);
     var filteredIndex = 0;
     var columnsAsFunc = false;
-    var schemaLen = (0, _object2.deepObjectSize)(schema);
+    var schemaLen = (0, _object.deepObjectSize)(schema);
 
     if (typeof columns === 'function') {
       columnsLen = schemaLen > 0 ? schemaLen : this.instance.countSourceCols();
@@ -27185,7 +27185,7 @@ DataMap.prototype.createMap = function () {
     for (i = 0; i < columnsLen; i++) {
       var column = columnsAsFunc ? columns(i) : columns[i];
 
-      if ((0, _object2.isObject)(column)) {
+      if ((0, _object.isObject)(column)) {
         if (typeof column.data !== 'undefined') {
           var index = columnsAsFunc ? filteredIndex : i;
           this.colToPropCache[index] = column.data;
@@ -27281,7 +27281,7 @@ DataMap.prototype.createRow = function (index, amount, source) {
     if (this.instance.dataType === 'array') {
       if (this.instance.getSettings().dataSchema) {
         // Clone template array
-        row = (0, _object2.deepClone)(this.getSchema());
+        row = (0, _object.deepClone)(this.getSchema());
       } else {
         row = [];
         /* eslint-disable no-loop-func */
@@ -27293,7 +27293,7 @@ DataMap.prototype.createRow = function (index, amount, source) {
       row = this.instance.getSettings().dataSchema(index);
     } else {
       row = {};
-      (0, _object2.deepExtend)(row, this.getSchema());
+      (0, _object.deepExtend)(row, this.getSchema());
     }
 
     if (index === this.instance.countSourceRows()) {
@@ -27590,7 +27590,7 @@ DataMap.prototype.get = function (row, prop) {
   var value = null;
 
   // try to get value under property `prop` (includes dot)
-  if (dataRow && dataRow.hasOwnProperty && (0, _object2.hasOwnProperty)(dataRow, prop)) {
+  if (dataRow && dataRow.hasOwnProperty && (0, _object.hasOwnProperty)(dataRow, prop)) {
     value = dataRow[prop];
   } else if (typeof prop === 'string' && prop.indexOf('.') > -1) {
     var sliced = prop.split('.');
@@ -27625,7 +27625,7 @@ DataMap.prototype.get = function (row, prop) {
   }
 
   if (this.instance.hasHook('modifyData')) {
-    var valueHolder = (0, _object2.createObjectPropListener)(value);
+    var valueHolder = (0, _object.createObjectPropListener)(value);
 
     this.instance.runHooks('modifyData', row, this.propToCol(prop), valueHolder, 'get');
 
@@ -27672,7 +27672,7 @@ DataMap.prototype.set = function (row, prop, value, source) {
   //
 
   if (this.instance.hasHook('modifyData')) {
-    var valueHolder = (0, _object2.createObjectPropListener)(value);
+    var valueHolder = (0, _object.createObjectPropListener)(value);
 
     this.instance.runHooks('modifyData', row, this.propToCol(prop), valueHolder, 'set');
 
@@ -27682,7 +27682,7 @@ DataMap.prototype.set = function (row, prop, value, source) {
   }
 
   // try to set value under property `prop` (includes dot)
-  if (dataRow && dataRow.hasOwnProperty && (0, _object2.hasOwnProperty)(dataRow, prop)) {
+  if (dataRow && dataRow.hasOwnProperty && (0, _object.hasOwnProperty)(dataRow, prop)) {
     dataRow[prop] = value;
   } else if (typeof prop === 'string' && prop.indexOf('.') > -1) {
     var sliced = prop.split('.');
@@ -27705,7 +27705,7 @@ DataMap.prototype.set = function (row, prop, value, source) {
     if (!(dataRow instanceof Object)) {
       var dataSchema = this.priv.settings.dataSchema || Number.isInteger(prop) ? [] : {};
 
-      if (dataSchema instanceof Function) dataRow = dataSchema(row, prop, value, this.dataSource);else dataRow = _object.deepClone(dataSchema);
+      if (dataSchema instanceof Function) dataRow = dataSchema(row, prop, value, this.dataSource);else dataRow = (0, _object.deepClone)(dataSchema);
 
       this.dataSource[row] = dataRow;
     }
@@ -30053,7 +30053,7 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-07-19T19:28:12.058Z";
+Handsontable.buildDate = "2017-07-19T20:07:39.329Z";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "0.33.0";
 

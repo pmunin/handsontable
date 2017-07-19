@@ -529,7 +529,8 @@ export default function Core(rootElement, userSettings) {
                 }
 
               } else if (orgValue !== null && typeof orgValue === 'object') {
-                pushData = false;
+                //pushData = false;
+                pushData = true;
               }
               if (pushData) {
                 setData.push([current.row, current.col, value]);

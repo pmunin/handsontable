@@ -635,6 +635,20 @@ DataMap.prototype.set = function(row, prop, value, source) {
     prop(this.dataSource.slice(row, row + 1)[0], value, row, this.dataSource);
 
   } else {
+
+    if(!(dataRow instanceof Object))
+    {
+      var dataSchema = this.priv.settings.dataSchema || 
+        Number.isInteger(prop)?[]:{};
+      
+      if(dataSchema instanceof Function)
+        dataRow = dataSchema(row,prop, value, this.dataSource);
+      else 
+        dataRow = _object.deepClone(dataSchema);
+      
+      this.dataSource[row] = dataRow;
+    }
+
     dataRow[prop] = value;
   }
 };

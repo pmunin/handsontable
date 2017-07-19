@@ -5,5 +5,10 @@ sudo: false
 node_js:
   - "6"
 
-before_script:
-  - "export TZ=Europe/Warsaw"
+# before_script:
+#   - "export TZ=Europe/Warsaw"
+
+ after_success:
+  - ./travis_pushDist.sh
+ script:
+  - ./npm run build

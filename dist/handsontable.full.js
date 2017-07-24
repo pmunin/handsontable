@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 0.33.0
- * Date: Sat Jul 22 2017 17:12:08 GMT+0200 (CEST)
+ * Date: Mon Jul 24 2017 20:55:51 GMT+0200 (CEST)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -34642,10 +34642,15 @@ var DataSource = function () {
       var result = 0;
 
       if (Array.isArray(this.data)) {
+        var sampleItem = this.data[0];
+        if (sampleItem === null || sampleItem === undefined) sampleItem = this.data[1];
+
         if (this.dataType === 'array') {
-          result = this.data[0].length;
+          if (sampleItem === null || sampleItem === undefined) sampleItem = [];
+          result = sampleItem.length;
         } else if (this.dataType === 'object') {
-          result = Object.keys(this.data[0]).length;
+          if (sampleItem === null || sampleItem === undefined) sampleItem = {};
+          result = Object.keys(sampleItem).length;
         }
       }
 
@@ -36507,7 +36512,7 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-07-22T15:12:08.050Z";
+Handsontable.buildDate = "2017-07-24T18:55:51.520Z";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "0.33.0";
 

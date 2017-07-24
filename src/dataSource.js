@@ -155,10 +155,19 @@ class DataSource {
         rangeEach(startCol, endCol, (column) => {
           let prop = this.colToProp(column);
 
+          let rowProp = undefined;
+          if(prop instanceof Function)
+            rowProp = prop(row);
+          else
+            rowProp = (row===null||row===undefined)?undefined:row[prop];
+
           if (toArray) {
-            newRow.push(row[prop]);
+            newRow.push(rowProp);
           } else {
-            newRow[prop] = row[prop];
+            if(prop instanceof Function)
+              prop(newRow, rowProp);
+            else
+              newRow[prop] = rowProp;
           }
         });
       }

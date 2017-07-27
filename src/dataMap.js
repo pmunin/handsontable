@@ -552,7 +552,7 @@ DataMap.prototype.get = function(row, prop) {
      *      }
      *    }]}
      */
-    value = prop(this.dataSource.slice(row, row + 1)[0], undefined, row, this.dataSource);
+    value = prop.call(this, this.dataSource.slice(row, row + 1)[0], undefined, row);
   }
 
   if (this.instance.hasHook('modifyData')) {
@@ -632,7 +632,7 @@ DataMap.prototype.set = function(row, prop, value, source) {
 
   } else if (typeof prop === 'function') {
     /* see the `function` handler in `get` */
-    prop(this.dataSource.slice(row, row + 1)[0], value, row, this.dataSource);
+    prop.call(this, this.dataSource.slice(row, row + 1)[0], value, row);
 
   } else {
 

@@ -28,6 +28,13 @@ function DataMap(instance, priv, GridSettings) {
   this.skipCache = false;
   this.latestSourceRowsCount = 0;
 
+  this.duckSchema = this.instance.getSettings().dataSchema;
+  if (this.duckSchema) {
+    if (typeof this.duckSchema === 'function') {
+      this.duckSchema = this.duckSchema();
+    }
+  }
+
   if (this.dataSource && this.dataSource[0]) {
     this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
   } else {

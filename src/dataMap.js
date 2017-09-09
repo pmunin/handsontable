@@ -35,8 +35,7 @@ function DataMap(instance, priv, GridSettings) {
     }
   }
 
-  if(this.duckSchema===undefined)
-  {
+  if (this.duckSchema === undefined) {
     if (this.dataSource && this.dataSource[0]) {
       this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
     } else {

@@ -276,7 +276,7 @@ export function deepObjectSize(object) {
 
     if (isObject(obj)) {
       objectEach(obj, (key) => {
-        result += recursObjLen(key);
+        result += recursObjLen(key, inspected);
       });
     } else {
       result++;

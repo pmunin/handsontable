@@ -35,10 +35,13 @@ function DataMap(instance, priv, GridSettings) {
     }
   }
 
-  if (this.dataSource && this.dataSource[0]) {
-    this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
-  } else {
-    this.duckSchema = {};
+  if(this.duckSchema===undefined)
+  {
+    if (this.dataSource && this.dataSource[0]) {
+      this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
+    } else {
+      this.duckSchema = {};
+    }
   }
   this.createMap();
   this.interval = Interval.create(() => this.clearLengthCache(), '15fps');

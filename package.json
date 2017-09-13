@@ -122,6 +122,5 @@
       "__HOT_VERSION__": "",
       "__HOT_BASE_VERSION__": ""
     }
-  },
-  "typings": "./handsontable.d.ts"
+  }
 }

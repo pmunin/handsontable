@@ -512,7 +512,9 @@ export default function Core(rootElement, userSettings) {
                   value = isUndefined(result.value) ? value : result.value;
                 }
               }
-              if (value !== null && typeof value === 'object') {
+
+              if(false) { //Allowing autocomplete to pass objects. Not sure what scenario it can break
+              //if (value !== null && typeof value === 'object') {
                 if (orgValue === null || typeof orgValue !== 'object') {
                   pushData = false;
 

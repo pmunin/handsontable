@@ -155,10 +155,19 @@ class DataSource {
         rangeEach(startCol, endCol, (column) => {
           let prop = this.colToProp(column);
 
+          let rowProp = undefined;
+          if(prop instanceof Function)
+            rowProp = prop(row);
+          else
+            rowProp = (row===null||row===undefined)?undefined:row[prop];
+
           if (toArray) {
-            newRow.push(row[prop]);
+            newRow.push(rowProp);
           } else {
-            newRow[prop] = row[prop];
+            if(prop instanceof Function)
+              prop(newRow, rowProp);
+            else
+              newRow[prop] = rowProp;
           }
         });
       }
@@ -187,11 +196,16 @@ class DataSource {
     let result = 0;
 
     if (Array.isArray(this.data)) {
+      let sampleItem = this.data[0];
+      if(sampleItem===null || sampleItem===undefined) sampleItem = this.data[1];
+
       if (this.dataType === 'array') {
-        result = this.data[0].length;
+        if(sampleItem===null||sampleItem===undefined) sampleItem = [];
+        result = sampleItem.length;
 
       } else if (this.dataType === 'object') {
-        result = Object.keys(this.data[0]).length;
+        if(sampleItem===null||sampleItem===undefined) sampleItem = {};
+        result = Object.keys(sampleItem).length;
       }
     }
 

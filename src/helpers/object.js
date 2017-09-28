@@ -269,12 +269,14 @@ export function deepObjectSize(object) {
   if (!isObject(object)) {
     return 0;
   }
-  let recursObjLen = function(obj) {
+  let recursObjLen = function(obj, inspected = []) {
+    if (inspected.includes(obj)) { return 0; }
+    inspected.push(obj);
     let result = 0;
 
     if (isObject(obj)) {
       objectEach(obj, (key) => {
-        result += recursObjLen(key);
+        result += recursObjLen(key, inspected);
       });
     } else {
       result++;

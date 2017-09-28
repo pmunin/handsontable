@@ -23,8 +23,8 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
- * Version: 0.33.0
- * Date: Wed Jul 19 2017 22:07:39 GMT+0200 (CEST)
+ * Version: 0.34.0
+ * Date: Wed Sep 13 2017 07:29:18 GMT+0200 (CEST)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -1444,11 +1444,17 @@ function deepObjectSize(object) {
     return 0;
   }
   var recursObjLen = function recursObjLen(obj) {
+    var inspected = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+
+    if (inspected.includes(obj)) {
+      return 0;
+    }
+    inspected.push(obj);
     var result = 0;
 
     if (isObject(obj)) {
       objectEach(obj, function (key) {
-        result += recursObjLen(key);
+        result += recursObjLen(key, inspected);
       });
     } else {
       result++;
@@ -2894,6 +2900,18 @@ var REGISTERED_HOOKS = [
 'afterSetCellMeta',
 
 /**
+ * Called after cell meta is removed.
+ *
+ * @event Hooks#afterRemoveCellMeta
+ * @since 0.33.1
+ * @param {Number} row Visual row index.
+ * @param {Number} col Visual column index.
+ * @param {String} key The removed meta key.
+ * @param {*} value Value which was under removed key of cell meta.
+ */
+'afterRemoveCellMeta',
+
+/**
  * Called after cell data was changed.
  *
  * @event Hooks#afterSetDataAtCell
@@ -2919,6 +2937,7 @@ var REGISTERED_HOOKS = [
  * Fired after calling the `updateSettings` method.
  *
  * @event Hooks#afterUpdateSettings
+ * @param {Object} settings New settings object.
  */
 'afterUpdateSettings',
 
@@ -3044,6 +3063,18 @@ var REGISTERED_HOOKS = [
  * @param {Object} cellProperties Object containing the cell's properties.
  */
 'beforeGetCellMeta',
+
+/**
+ * Called before cell meta is removed.
+ *
+ * @event Hooks#beforeRemoveCellMeta
+ * @since 0.33.1
+ * @param {Number} row Visual row index.
+ * @param {Number} col Visual column index.
+ * @param {String} key The removed meta key.
+ * @param {*} value Value which is under removed key of cell meta.
+ */
+'beforeRemoveCellMeta',
 
 /**
  * @description
@@ -3922,6 +3953,7 @@ var Hooks = function () {
     value: function createEmptyBucket() {
       var bucket = Object.create(null);
 
+      // eslint-disable-next-line no-return-assign
       (0, _array.arrayEach)(REGISTERED_HOOKS, function (hook) {
         return bucket[hook] = [];
       });
@@ -4203,6 +4235,7 @@ var Hooks = function () {
     value: function destroy() {
       var context = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
+      // eslint-disable-next-line no-return-assign
       (0, _object.objectEach)(this.getBucket(context), function (value, key, bucket) {
         return bucket[key].length = 0;
       });
@@ -9905,7 +9938,7 @@ function Core(rootElement, userSettings) {
         instance.view.wt.wtViewport.resetHasOversizedColumnHeadersMarked();
       }
 
-      instance.runHooks('afterUpdateSettings');
+      instance.runHooks('afterUpdateSettings', settings);
     }
 
     grid.adjustRowsAndCols();
@@ -10373,16 +10406,29 @@ function Core(rootElement, userSettings) {
    *
    * @memberof Core#
    * @function removeCellMeta
-   * @param {Number} row Visual/physical row index.
-   * @param {Number} col Visual/physical column index.
+   * @param {Number} row Visual row index.
+   * @param {Number} col Visual column index.
    * @param {String} key Property name.
+   * @fires Hooks#beforeRemoveCellMeta
+   * @fires Hooks#afterRemoveCellMeta
    */
   this.removeCellMeta = function (row, col, key) {
-    // TODO: First we use indexes as visual, after that, the same indexes are used as physical. This MUST be improved.
-    var cellMeta = instance.getCellMeta(row, col);
-    if (cellMeta[key] != undefined) {
-      delete priv.cellSettings[row][col][key];
+    var _recordTranslator$toP = recordTranslator.toPhysical(row, col),
+        _recordTranslator$toP2 = _slicedToArray(_recordTranslator$toP, 2),
+        physicalRow = _recordTranslator$toP2[0],
+        physicalColumn = _recordTranslator$toP2[1];
+
+    var cachedValue = priv.cellSettings[physicalRow][physicalColumn][key];
+
+    var hookResult = instance.runHooks('beforeRemoveCellMeta', row, col, key, cachedValue);
+
+    if (hookResult !== false) {
+      delete priv.cellSettings[physicalRow][physicalColumn][key];
+
+      instance.runHooks('afterRemoveCellMeta', row, col, key, cachedValue);
     }
+
+    cachedValue = null;
   };
 
   /**
@@ -10437,25 +10483,22 @@ function Core(rootElement, userSettings) {
    * @fires Hooks#afterSetCellMeta
    */
   this.setCellMeta = function (row, col, key, val) {
-    var _recordTranslator$toP = recordTranslator.toPhysical(row, col);
+    var _recordTranslator$toP3 = recordTranslator.toPhysical(row, col),
+        _recordTranslator$toP4 = _slicedToArray(_recordTranslator$toP3, 2),
+        physicalRow = _recordTranslator$toP4[0],
+        physicalColumn = _recordTranslator$toP4[1];
 
-    var _recordTranslator$toP2 = _slicedToArray(_recordTranslator$toP, 2);
-
-    row = _recordTranslator$toP2[0];
-    col = _recordTranslator$toP2[1];
-
-
-    if (!priv.columnSettings[col]) {
-      priv.columnSettings[col] = (0, _setting.columnFactory)(GridSettings, priv.columnsSettingConflicts);
+    if (!priv.columnSettings[physicalColumn]) {
+      priv.columnSettings[physicalColumn] = (0, _setting.columnFactory)(GridSettings, priv.columnsSettingConflicts);
     }
 
-    if (!priv.cellSettings[row]) {
-      priv.cellSettings[row] = [];
+    if (!priv.cellSettings[physicalRow]) {
+      priv.cellSettings[physicalRow] = [];
     }
-    if (!priv.cellSettings[row][col]) {
-      priv.cellSettings[row][col] = new priv.columnSettings[col]();
+    if (!priv.cellSettings[physicalRow][physicalColumn]) {
+      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]();
     }
-    priv.cellSettings[row][col][key] = val;
+    priv.cellSettings[physicalRow][physicalColumn][key] = val;
     instance.runHooks('afterSetCellMeta', row, col, key, val);
   };
 
@@ -10481,37 +10524,31 @@ function Core(rootElement, userSettings) {
    * @fires Hooks#afterGetCellMeta
    */
   this.getCellMeta = function (row, col) {
-    var prop = datamap.colToProp(col),
-        cellProperties;
+    var prop = datamap.colToProp(col);
+    var cellProperties = void 0;
 
-    var visualRow = row;
-    var visualCol = col;
+    var _recordTranslator$toP5 = recordTranslator.toPhysical(row, col),
+        _recordTranslator$toP6 = _slicedToArray(_recordTranslator$toP5, 2),
+        physicalRow = _recordTranslator$toP6[0],
+        physicalColumn = _recordTranslator$toP6[1];
 
-    var _recordTranslator$toP3 = recordTranslator.toPhysical(row, col);
-
-    var _recordTranslator$toP4 = _slicedToArray(_recordTranslator$toP3, 2);
-
-    row = _recordTranslator$toP4[0];
-    col = _recordTranslator$toP4[1];
-
-
-    if (!priv.columnSettings[col]) {
-      priv.columnSettings[col] = (0, _setting.columnFactory)(GridSettings, priv.columnsSettingConflicts);
+    if (!priv.columnSettings[physicalColumn]) {
+      priv.columnSettings[physicalColumn] = (0, _setting.columnFactory)(GridSettings, priv.columnsSettingConflicts);
     }
 
-    if (!priv.cellSettings[row]) {
-      priv.cellSettings[row] = [];
+    if (!priv.cellSettings[physicalRow]) {
+      priv.cellSettings[physicalRow] = [];
     }
-    if (!priv.cellSettings[row][col]) {
-      priv.cellSettings[row][col] = new priv.columnSettings[col]();
+    if (!priv.cellSettings[physicalRow][physicalColumn]) {
+      priv.cellSettings[physicalRow][physicalColumn] = new priv.columnSettings[physicalColumn]();
     }
 
-    cellProperties = priv.cellSettings[row][col]; // retrieve cellProperties from cache
+    cellProperties = priv.cellSettings[physicalRow][physicalColumn]; // retrieve cellProperties from cache
 
-    cellProperties.row = row;
-    cellProperties.col = col;
-    cellProperties.visualRow = visualRow;
-    cellProperties.visualCol = visualCol;
+    cellProperties.row = physicalRow;
+    cellProperties.col = physicalColumn;
+    cellProperties.visualRow = row;
+    cellProperties.visualCol = col;
     cellProperties.prop = prop;
     cellProperties.instance = instance;
 
@@ -10519,7 +10556,7 @@ function Core(rootElement, userSettings) {
     (0, _object.extend)(cellProperties, expandType(cellProperties)); // for `type` added in beforeGetCellMeta
 
     if (cellProperties.cells) {
-      var settings = cellProperties.cells.call(cellProperties, row, col, prop);
+      var settings = cellProperties.cells.call(cellProperties, physicalRow, physicalColumn, prop);
 
       if (settings) {
         (0, _object.extend)(cellProperties, settings);
@@ -23582,7 +23619,7 @@ var arrayMapper = {
   getValueByIndex: function getValueByIndex(index) {
     var value = void 0;
 
-    /* eslint-disable no-cond-assign */
+    // eslint-disable-next-line no-cond-assign, no-return-assign
     return (value = this._arrayMap[index]) === void 0 ? null : value;
   },
 
@@ -23596,7 +23633,7 @@ var arrayMapper = {
   getIndexByValue: function getIndexByValue(value) {
     var index = void 0;
 
-    /* eslint-disable no-cond-assign */
+    // eslint-disable-next-line no-cond-assign, no-return-assign
     return (index = this._arrayMap.indexOf(value)) === -1 ? null : index;
   },
 
@@ -25456,14 +25493,14 @@ function autoResize() {
       text = document.createTextNode(''),
       span = document.createElement('SPAN'),
       observe = function observe(element, event, handler) {
-    if (window.attachEvent) {
+    if (element.attachEvent) {
       element.attachEvent('on' + event, handler);
     } else {
       element.addEventListener(event, handler, false);
     }
   },
       _unObserve = function _unObserve(element, event, handler) {
-    if (window.removeEventListener) {
+    if (element.removeEventListener) {
       element.removeEventListener(event, handler, false);
     } else {
       element.detachEvent('on' + event, handler);
@@ -27099,10 +27136,19 @@ function DataMap(instance, priv, GridSettings) {
   this.skipCache = false;
   this.latestSourceRowsCount = 0;
 
-  if (this.dataSource && this.dataSource[0]) {
-    this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
-  } else {
-    this.duckSchema = {};
+  this.duckSchema = this.instance.getSettings().dataSchema;
+  if (this.duckSchema) {
+    if (typeof this.duckSchema === 'function') {
+      this.duckSchema = this.duckSchema();
+    }
+  }
+
+  if (this.duckSchema === undefined) {
+    if (this.dataSource && this.dataSource[0]) {
+      this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
+    } else {
+      this.duckSchema = {};
+    }
   }
   this.createMap();
   this.interval = _interval2.default.create(function () {
@@ -27491,7 +27537,7 @@ DataMap.prototype.removeCol = function (index, amount, source) {
  * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed
  * @returns {Array} Returns removed portion of columns
  */
-DataMap.prototype.spliceCol = function (col, index, amount /* , elements...*/) {
+DataMap.prototype.spliceCol = function (col, index, amount /* , elements... */) {
   var elements = arguments.length >= 4 ? [].slice.call(arguments, 3) : [];
 
   var colData = this.instance.getDataAtCol(col);
@@ -27518,7 +27564,7 @@ DataMap.prototype.spliceCol = function (col, index, amount /* , elements...*/) {
  * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed.
  * @returns {Array} Returns removed portion of rows
  */
-DataMap.prototype.spliceRow = function (row, index, amount /* , elements...*/) {
+DataMap.prototype.spliceRow = function (row, index, amount /* , elements... */) {
   var elements = arguments.length >= 4 ? [].slice.call(arguments, 3) : [];
 
   var rowData = this.instance.getSourceDataAtRow(row);
@@ -27621,7 +27667,7 @@ DataMap.prototype.get = function (row, prop) {
      *      }
      *    }]}
      */
-    value = prop(this.dataSource.slice(row, row + 1)[0], undefined, row, this.dataSource);
+    value = prop.call(this, this.dataSource.slice(row, row + 1)[0], undefined, row);
   }
 
   if (this.instance.hasHook('modifyData')) {
@@ -27699,7 +27745,7 @@ DataMap.prototype.set = function (row, prop, value, source) {
     out[sliced[i]] = value;
   } else if (typeof prop === 'function') {
     /* see the `function` handler in `get` */
-    prop(this.dataSource.slice(row, row + 1)[0], value, row, this.dataSource);
+    prop.call(this, this.dataSource.slice(row, row + 1)[0], value, row);
   } else {
 
     if (!(dataRow instanceof Object)) {
@@ -28150,10 +28196,13 @@ var DataSource = function () {
           (0, _number.rangeEach)(startCol, endCol, function (column) {
             var prop = _this2.colToProp(column);
 
+            var rowProp = undefined;
+            if (prop instanceof Function) rowProp = prop(row);else rowProp = row === null || row === undefined ? undefined : row[prop];
+
             if (toArray) {
-              newRow.push(row[prop]);
+              newRow.push(rowProp);
             } else {
-              newRow[prop] = row[prop];
+              if (prop instanceof Function) prop(newRow, rowProp);else newRow[prop] = rowProp;
             }
           });
         }
@@ -28188,10 +28237,15 @@ var DataSource = function () {
       var result = 0;
 
       if (Array.isArray(this.data)) {
+        var sampleItem = this.data[0];
+        if (sampleItem === null || sampleItem === undefined) sampleItem = this.data[1];
+
         if (this.dataType === 'array') {
-          result = this.data[0].length;
+          if (sampleItem === null || sampleItem === undefined) sampleItem = [];
+          result = sampleItem.length;
         } else if (this.dataType === 'object') {
-          result = Object.keys(this.data[0]).length;
+          if (sampleItem === null || sampleItem === undefined) sampleItem = {};
+          result = Object.keys(sampleItem).length;
         }
       }
 
@@ -30053,9 +30107,9 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-07-19T20:07:39.329Z";
+Handsontable.buildDate = "2017-09-13T05:29:18.241Z";
 Handsontable.packageName = "handsontable";
-Handsontable.version = "0.33.0";
+Handsontable.version = "0.34.0";
 
 var baseVersion = undefined;
 
@@ -33531,7 +33585,7 @@ var META_READONLY = 'readOnly';
  * var commentsPlugin = hot.getPlugin('comments');
  *
  * // Manage comments programmatically:
- * commentsPlugin.editor.setCommentAtCell(1, 6, 'Comment contents');
+ * commentsPlugin.setCommentAtCell(1, 6, 'Comment contents');
  * commentsPlugin.showAtCell(1, 6);
  * commentsPlugin.removeCommentAtCell(1, 6);
  *
@@ -36946,8 +37000,10 @@ function copyItem(copyPastePlugin) {
       copyPastePlugin.setCopyableText();
       copyPastePlugin.copy(true);
     },
+    disabled: function disabled() {
+      return !copyPastePlugin.hot.getSelected();
+    },
 
-    disabled: false,
     hidden: false
   };
 }
@@ -36969,8 +37025,10 @@ function cutItem(copyPastePlugin) {
       copyPastePlugin.setCopyableText();
       copyPastePlugin.cut(true);
     },
+    disabled: function disabled() {
+      return !copyPastePlugin.hot.getSelected();
+    },
 
-    disabled: false,
     hidden: false
   };
 }
@@ -37174,7 +37232,6 @@ var CopyPaste = function (_BasePlugin) {
       this.addHook('beforeKeyDown', function (event) {
         return _this2.onBeforeKeyDown(event);
       });
-      // this.addHook('beforeOnCellMouseDown', () => this.onBeforeOnCellMouseDown());
 
       this.registerEvents();
 
@@ -37208,7 +37265,7 @@ var CopyPaste = function (_BasePlugin) {
     }
 
     /**
-     * Prepares copyable text in the invisible textarea.
+     * Prepares copyable text from the cells selection in the invisible textarea.
      *
      * @function setCopyable
      * @memberof CopyPaste#
@@ -37218,6 +37275,11 @@ var CopyPaste = function (_BasePlugin) {
     key: 'setCopyableText',
     value: function setCopyableText() {
       var selRange = this.hot.getSelectedRange();
+
+      if (!selRange) {
+        return;
+      }
+
       var topLeft = selRange.getTopLeftCorner();
       var bottomRight = selRange.getBottomRightCorner();
       var startRow = topLeft.row;

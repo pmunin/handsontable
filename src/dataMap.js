@@ -28,10 +28,19 @@ function DataMap(instance, priv, GridSettings) {
   this.skipCache = false;
   this.latestSourceRowsCount = 0;
 
-  if (this.dataSource && this.dataSource[0]) {
-    this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
-  } else {
-    this.duckSchema = {};
+  this.duckSchema = this.instance.getSettings().dataSchema;
+  if (this.duckSchema) {
+    if (typeof this.duckSchema === 'function') {
+      this.duckSchema = this.duckSchema();
+    }
+  }
+
+  if (this.duckSchema === undefined) {
+    if (this.dataSource && this.dataSource[0]) {
+      this.duckSchema = this.recursiveDuckSchema(this.dataSource[0]);
+    } else {
+      this.duckSchema = {};
+    }
   }
   this.createMap();
   this.interval = Interval.create(() => this.clearLengthCache(), '15fps');
@@ -422,7 +431,7 @@ DataMap.prototype.removeCol = function(index, amount, source) {
  * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed
  * @returns {Array} Returns removed portion of columns
  */
-DataMap.prototype.spliceCol = function(col, index, amount/* , elements...*/) {
+DataMap.prototype.spliceCol = function(col, index, amount/* , elements... */) {
   var elements = arguments.length >= 4 ? [].slice.call(arguments, 3) : [];
 
   var colData = this.instance.getDataAtCol(col);
@@ -449,7 +458,7 @@ DataMap.prototype.spliceCol = function(col, index, amount/* , elements...*/) {
  * @param {Number} amount An integer indicating the number of old array elements to remove. If amount is 0, no elements are removed.
  * @returns {Array} Returns removed portion of rows
  */
-DataMap.prototype.spliceRow = function(row, index, amount/* , elements...*/) {
+DataMap.prototype.spliceRow = function(row, index, amount/* , elements... */) {
   var elements = arguments.length >= 4 ? [].slice.call(arguments, 3) : [];
 
   var rowData = this.instance.getSourceDataAtRow(row);
@@ -552,7 +561,7 @@ DataMap.prototype.get = function(row, prop) {
      *      }
      *    }]}
      */
-    value = prop(this.dataSource.slice(row, row + 1)[0], undefined, row, this.dataSource);
+    value = prop.call(this, this.dataSource.slice(row, row + 1)[0], undefined, row);
   }
 
   if (this.instance.hasHook('modifyData')) {
@@ -632,7 +641,7 @@ DataMap.prototype.set = function(row, prop, value, source) {
 
   } else if (typeof prop === 'function') {
     /* see the `function` handler in `get` */
-    prop(this.dataSource.slice(row, row + 1)[0], value, row, this.dataSource);
+    prop.call(this, this.dataSource.slice(row, row + 1)[0], value, row);
 
   } else {
 

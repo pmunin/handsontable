@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 0.34.0
- * Date: Wed Sep 13 2017 07:29:18 GMT+0200 (CEST)
+ * Date: Thu Sep 28 2017 18:56:32 GMT+0200 (CEST)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -8671,7 +8671,10 @@ function Core(rootElement, userSettings) {
                   value = (0, _mixed.isUndefined)(result.value) ? value : result.value;
                 }
               }
-              if (value !== null && (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object') {
+
+              if (false) {
+                //Allowing autocomplete to pass objects. Not sure what scenario it can break
+                //if (value !== null && typeof value === 'object') {
                 if (orgValue === null || (typeof orgValue === 'undefined' ? 'undefined' : _typeof(orgValue)) !== 'object') {
                   pushData = false;
                 } else {
@@ -30107,7 +30110,7 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-09-13T05:29:18.241Z";
+Handsontable.buildDate = "2017-09-28T16:56:32.563Z";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "0.34.0";
 

@@ -178,7 +178,7 @@ DataMap.prototype.getSchema = function() {
 
   if (schema) {
     if (typeof schema === 'function') {
-      return schema();
+      return schema.call(this);
     }
     return schema;
   }

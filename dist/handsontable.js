@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 0.34.0
- * Date: Tue Oct 31 2017 11:34:07 GMT+0100 (CET)
+ * Date: Tue Oct 31 2017 22:15:41 GMT+0100 (CET)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -1368,7 +1368,16 @@ function mixin(Base) {
  * @returns {Boolean}
  */
 function isObjectEquals(object1, object2) {
-  return JSON.stringify(object1) === JSON.stringify(object2);
+  //Preventing bug when we paste
+  var json1 = void 0,
+      json2 = void 0;
+  try {
+    json1 = JSON.stringify(object1);
+  } catch (e) {}
+  try {
+    json2 = JSON.stringify(object2);
+  } catch (e) {}
+  return json1 === json2;
 }
 
 /**
@@ -30340,7 +30349,7 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-10-31T10:34:07.766Z";
+Handsontable.buildDate = "2017-10-31T21:15:41.863Z";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "0.34.0";
 

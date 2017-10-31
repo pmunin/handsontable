@@ -24,7 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * 
  * Version: 0.34.0
- * Date: Fri Oct 27 2017 01:06:33 GMT+0200 (CEST)
+ * Date: Tue Oct 31 2017 11:34:07 GMT+0100 (CET)
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -28365,7 +28365,7 @@ var DataSource = function () {
         if (typeof prop === 'string') {
           result = (0, _object.getProperty)(dataRow, prop);
         } else if (typeof prop === 'function') {
-          result = prop(this.data.slice(row, row + 1)[0]);
+          result = prop.call(this, this.data.slice(row, row + 1)[0]);
         } else {
           result = dataRow[prop];
         }
@@ -28410,12 +28410,12 @@ var DataSource = function () {
             var prop = _this2.colToProp(column);
 
             var rowProp = undefined;
-            if (prop instanceof Function) rowProp = prop(row);else rowProp = row === null || row === undefined ? undefined : row[prop];
+            if (prop instanceof Function) rowProp = prop.call(_this2, row);else rowProp = row === null || row === undefined ? undefined : row[prop];
 
             if (toArray) {
               newRow.push(rowProp);
             } else {
-              if (prop instanceof Function) prop(newRow, rowProp);else newRow[prop] = rowProp;
+              if (prop instanceof Function) prop.call(_this2, newRow, rowProp);else newRow[prop] = rowProp;
             }
           });
         }
@@ -30340,7 +30340,7 @@ Handsontable.DefaultSettings = _defaultSettings2.default;
 Handsontable.EventManager = _eventManager2.default;
 Handsontable._getListenersCounter = _eventManager.getListenersCounter; // For MemoryLeak tests
 
-Handsontable.buildDate = "2017-10-26T23:06:33.804Z";
+Handsontable.buildDate = "2017-10-31T10:34:07.766Z";
 Handsontable.packageName = "handsontable";
 Handsontable.version = "0.34.0";
 

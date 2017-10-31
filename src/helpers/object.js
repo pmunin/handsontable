@@ -194,7 +194,18 @@ export function mixin(Base, ...mixins) {
  * @returns {Boolean}
  */
 export function isObjectEquals(object1, object2) {
-  return JSON.stringify(object1) === JSON.stringify(object2);
+  //Preventing bug when we paste
+  let json1,
+    json2;
+  try {
+    json1 = JSON.stringify(object1);
+  } catch (e) {
+  }
+  try {
+    json2 = JSON.stringify(object2);
+  } catch (e) {
+  }
+  return json1 === json2;
 }
 
 /**

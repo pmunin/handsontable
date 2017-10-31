@@ -116,7 +116,7 @@ class DataSource {
         result = getProperty(dataRow, prop);
 
       } else if (typeof prop === 'function') {
-        result = prop(this.data.slice(row, row + 1)[0]);
+        result = prop.call(this, this.data.slice(row, row + 1)[0]);
 
       } else {
         result = dataRow[prop];
@@ -157,7 +157,7 @@ class DataSource {
 
           let rowProp = undefined;
           if(prop instanceof Function)
-            rowProp = prop(row);
+            rowProp = prop.call(this,row);
           else
             rowProp = (row===null||row===undefined)?undefined:row[prop];
 
@@ -165,7 +165,7 @@ class DataSource {
             newRow.push(rowProp);
           } else {
             if(prop instanceof Function)
-              prop(newRow, rowProp);
+              prop.call(this, newRow, rowProp);
             else
               newRow[prop] = rowProp;
           }
